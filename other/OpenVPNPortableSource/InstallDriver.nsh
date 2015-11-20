@@ -32,7 +32,7 @@
        ;SilentInstall Silent
        AutoCloseWindow True
        SetCompressor /SOLID LZMA
-       RequestExecutionLevel user
+       RequestExecutionLevel admin
 !macroend
 
 !macro PROGRAM_ICON ICONNAME
