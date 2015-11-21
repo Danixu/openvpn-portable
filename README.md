@@ -13,7 +13,7 @@ To avoid downloading files during the "unzip process", you have to do this befor
  
  
 ## Update
-Just start OpenVPNPortable_x.x.x.paf.exe again and point it to the directory you already have OpenVPN Portable installed. It checks your version with the one on [sourceforge.net](http://sourceforge.net/projects/ovpnp/files/binpack/) and updates if needed.
+Just start OpenVPNPortable_x.x.x.paf.exe again and point it to the directory you already have OpenVPN Portable installed. It checks your version with the one on [bitbucket.org](https://bitbucket.org/Danixu86/openvpn-portable/downloads) and updates if needed.
 
 ## Usage
 All you need to do is double click OpenVPNPortable.exe to start.
@@ -27,8 +27,6 @@ If you want to connect on program startup, disable the splash or some settings e
  
 # How to build
 ## Requires
-* MinGW and MSYS from [mingw.org](http://www.mingw.org/)
-* OpenSSL from [http://www.slproweb.com/products/Win32OpenSSL.html](http://www.slproweb.com/products/Win32OpenSSL.html)
 * Unicode NSIS from [https://code.google.com/p/unsis/](https://code.google.com/p/unsis/)
  
  
@@ -48,7 +46,7 @@ NSIS needs some plugins. You can find it on [Plugins-Site](http://nsis.sourcefor
  
  
 ## Create
-* Compile the openvpn-gui and copy the binary to ./app/bin/openvpn-gui.exe. 
+* Compile the openvpn-gui and copy the binary to ./app/bin/openvpn-gui.exe or use the existing one. 
 	Refer the readme on the gui source directory for build instructions.
 	Take the source from this svn repository. It's optimized for portable use.
-* Execute the CreatePAF.vbs
+* Execute the CreatePAF.vbs to perform an automatic build. It will create both OpenVPN portable builds (admin and user) and the installer.

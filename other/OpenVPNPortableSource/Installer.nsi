@@ -24,19 +24,18 @@
 ;=== Include
 !include MUI.nsh
 !include FileFunc.nsh
-!include variables.nsh
-
+!include "CommonVariables.nsh"
 
 !define NAME "OpenVPN Portable"
 !define SHORTNAME "OpenVPNPortable"
-!define VERSION "1.8.3.0"
-!define FILENAME "OpenVPNPortable_1.8.3_beta"
+!define VERSION "1.8.4.0"
+!define FILENAME "OpenVPNPortable_1.8.4"
 !define CHECKRUNNING "openvpn-gui.exe"
 !define CLOSENAME "OpenVPN"
 
 ;=== Program Details
 Name "${NAME}"
-OutFile "${OutputFolder}\${FILENAME}.paf.exe"
+OutFile "..\..\${FILENAME}.paf.exe"
 InstallDir "\${SHORTNAME}"
 Caption "${NAME} | PortableApps.com Installer"
 VIProductVersion "${VERSION}"
@@ -62,11 +61,6 @@ CRCCheck on
 RequestExecutionLevel user
 ShowInstDetails show
 
-
-
-
-!system 'md "${OutputFolder}"'
-
 !insertmacro GetOptions
 !insertmacro GetDrives
 
@@ -89,17 +83,8 @@ Icon "${SHORTNAME}.ico"
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
-;=== Languages
-!insertmacro MUI_LANGUAGE "English"
-
-LangString welcome ${LANG_ENGLISH} "This wizard will guide you through the installation of ${NAME}.\r\n\r\nIf you are upgrading an existing installation of ${NAME}, please close it before proceeding.\r\n\r\nClick Next to continue."
-LangString finish ${LANG_ENGLISH} "${NAME} has been installed on your device.\r\n\r\nClick Finish to close this wizard."
-LangString runwarning ${LANG_ENGLISH} "Please close all instances of ${CLOSENAME} and then click OK.  The portable app can not be upgraded while it is running."
-
-!insertmacro MUI_LANGUAGE "Spanish"
-LangString welcome ${LANG_SPANISH} "Este asistente te guiará a lo largo de la instalación de ${NAME}.\r\n\r\nIf you are upgrading an existing installation of ${NAME}, please close it before proceeding.\r\n\r\nClick Next to continue."
-LangString finish ${LANG_SPANISH} "${NAME} has been installed on your device.\r\n\r\nClick Finish to close this wizard."
-LangString runwarning ${LANG_SPANISH} "Please close all instances of ${CLOSENAME} and then click OK.  The portable app can not be upgraded while it is running."
+; Languages
+!include "Installer_Lang_*.nsh"
 
 ;=== Variables
 Var FOUNDPORTABLEAPPSPATH
@@ -107,6 +92,8 @@ Var BINPACKURL
 
 Function .onInit
 	;StrCpy $FOUNDPORTABLEAPPSPATH ''
+	
+	!insertmacro MUI_LANGDLL_DISPLAY
 
 	${GetOptions} "$CMDLINE" "/DESTINATION=" $R0
 
@@ -182,86 +169,124 @@ Function CheckForRunningApp
 	End:
 FunctionEnd
 
-Section "!App Portable (required)"
-	SetOutPath $INSTDIR
+SubSection $(SECTION_App)
+	Section $(SECTION_App_User) App_User
+		SetOutPath $INSTDIR
 
-	File OpenVPNPortable.ini
-	File ${OutputFolder}\OpenVPNPortable.exe
-	
-	SetOutPath $INSTDIR\app
-	File /r "..\..\app\*.*"
-	
-	StrCmp "$BINPACKURL" "." CopyCurrent
-		StrCpy $2 "$BINPACKURL/current.txt"
+		File OpenVPNPortable.ini
+		File ${OutputFolder}\OpenVPNPortable.exe
 		
-		;get the latest version of the package.
-		inetc::get /SILENT "$2" "$TEMP\new.txt" /END
-		Pop $R0 ;Get the return value
-			StrCmp $R0 "OK" 0 DownloadFailed
-			Goto ReadFile
-	
-	CopyCurrent:
-		StrCpy $2 "$EXEDIR/current.txt"
-		CopyFiles "$2" "$TEMP/new.txt"
-		IfErrors DownloadFailed
+		SetOutPath $INSTDIR\app
+		File /r "..\..\app\*.*"
+		
+		SetOutPath $INSTDIR\app\bin
+		File ${OutputFolder}\TinyOpenVPNGui.exe
+	SectionEnd
+
+	Section $(SECTION_App_Admin) App_Admin
+		SetOutPath $INSTDIR
+
+		File OpenVPNPortable.ini
+		File ${OutputFolder}\OpenVPNPortable_admin.exe
+		
+		SetOutPath $INSTDIR\app
+		File /r "..\..\app\*.*"
+		
+		SetOutPath $INSTDIR\app\bin
+		File ${OutputFolder}\TinyOpenVPNGui.exe
+	SectionEnd
+
+	Section $(SECTION_App_OVpn) OVpn
+		StrCmp "$BINPACKURL" "." CopyCurrent
+			StrCpy $2 "$BINPACKURL/current.txt"
 			
-	ReadFile:
-		FileOpen $0 "$TEMP\new.txt" r
-		FileRead $0 $1
-		FileClose $0
-		Delete /REBOOTOK "$TEMP\new.txt"
-	
-	StrCpy $2 "0.0.0"
-	
-	IfFileExists "$INSTDIR\current.txt" 0 Compare
-		FileOpen $0 "$INSTDIR\current.txt" r
-		FileRead $0 $2
-		FileClose $0
-	
-	Compare:
-		StrCmp "$1" "$2" End 0
-	
-	StrCmp "$BINPACKURL" "." CopyBinpack
-		StrCpy $2 "$BINPACKURL/$1.zip"
+			;get the latest version of the package.
+			inetc::get /SILENT "$2" "$TEMP\new.txt" /END
+			Pop $R0 ;Get the return value
+				StrCmp $R0 "OK" 0 DownloadFailed
+				Goto ReadFile
 		
-		;inetc::get /POPUP "" /CAPTION "Probando..." "https://bitbucket.org/Danixu86/openvpn-portable/downloads/current.txt" "$DESKTOP\temp.txt" /END
-		
-		;Download the package.
-		inetc::get /POPUP "" /CAPTION "Get latest openvpn binaries..." $2 "$TEMP\current.zip" /END
-		Pop $R0 ;Get the return value
-			StrCmp $R0 "OK" Extract DownloadFailed
+		CopyCurrent:
+			StrCpy $2 "$EXEDIR/current.txt"
+			CopyFiles "$2" "$TEMP/new.txt"
+			IfErrors DownloadFailed
 				
-	CopyBinpack:
-		StrCpy $2 "$EXEDIR/$1.zip"
-		CopyFiles "$2" "$TEMP\current.zip"
-		IfErrors DownloadFailed
+		ReadFile:
+			FileOpen $0 "$TEMP\new.txt" r
+			FileRead $0 $1
+			FileClose $0
+			Delete /REBOOTOK "$TEMP\new.txt"
 		
-	Extract:
-		nsisunz::UnzipToLog "$TEMP\current.zip" "$INSTDIR"
-		Pop $R0
-		StrCmp $R0 "success" +2
-			DetailPrint "$R0" ;print error message to log
-
-		Delete /REBOOTOK "$TEMP\current.zip"
+		StrCpy $2 "0.0.0"
 		
-		FileOpen $0 $INSTDIR\current.txt w
-		FileWrite $0 $1
-		FileClose $0
+		IfFileExists "$INSTDIR\current.txt" 0 Compare
+			FileOpen $0 "$INSTDIR\current.txt" r
+			FileRead $0 $2
+			FileClose $0
 		
-		Goto End
-	
-	DownloadFailed:
-		MessageBox MB_OK|MB_ICONSTOP "Unable to download file $2 ($R0)"
-	
-	End:
-SectionEnd
+		Compare:
+			StrCmp "$1" "$2" End 0
+		
+		StrCmp "$BINPACKURL" "." CopyBinpack
+			StrCpy $2 "$BINPACKURL/$1.zip"
+			
+			;Download the package.
+			inetc::get /POPUP "" /CAPTION "Get latest openvpn binaries..." $2 "$TEMP\current.zip" /END
+			Pop $R0 ;Get the return value
+				StrCmp $R0 "OK" Extract DownloadFailed
+					
+		CopyBinpack:
+			StrCpy $2 "$EXEDIR/$1.zip"
+			CopyFiles "$2" "$TEMP\current.zip"
+			IfErrors DownloadFailed
+			
+		Extract:
+			nsisunz::UnzipToLog "$TEMP\current.zip" "$INSTDIR"
+			Pop $R0
+			StrCmp $R0 "success" +2
+				DetailPrint "$R0" ;print error message to log
 
-Section "!OpenVPNPortable Source Code"
-	SetOutPath $INSTDIR\other\OpenVPNPortableSource
-	File /r "..\..\other\OpenVPNPortableSource\*.*"
-SectionEnd
+			Delete /REBOOTOK "$TEMP\current.zip"
+			
+			FileOpen $0 $INSTDIR\current.txt w
+			FileWrite $0 $1
+			FileClose $0
+			
+		CreateFolders:
+			CreateDirectory "$INSTDIR\data"
+			CreateDirectory "$INSTDIR\data\config"
+			CreateDirectory "$INSTDIR\data\log"
+			
+			Goto End
+		
+		DownloadFailed:
+			MessageBox MB_OK|MB_ICONSTOP "Unable to download file $2 ($R0)"
+		
+		End:
+	SectionEnd
+SubSectionEnd
 
-Section "!TinyOpenVPNGui NSIS Source Code"
-	SetOutPath $INSTDIR\other\TinyOpenVPNGuiNSIS
-	File /r "..\..\other\TinyOpenVPNGuiNSIS\*.*"
-SectionEnd
+SubSection $(SECTION_Source)
+	Section $(SECTION_Source_OpenVPNGui) App_Source_OpenVPNGui
+		SetOutPath $INSTDIR\other\openvpn-gui-source
+		File /r "..\..\other\openvpn-gui-source\*.*"
+	SectionEnd
+
+	Section $(SECTION_Source_OpenVPN) App_Source
+		SetOutPath $INSTDIR\other\OpenVPNPortableSource
+		File /r "..\..\other\OpenVPNPortableSource\*.*"
+	SectionEnd
+
+	Section $(SECTION_Source_TinyVpn) Tiny_Source
+		SetOutPath $INSTDIR\other\TinyOpenVPNGuiNSIS
+		File /r "..\..\other\TinyOpenVPNGuiNSIS\*.*"
+	SectionEnd
+SubSectionEnd
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+	!insertmacro MUI_DESCRIPTION_TEXT ${App_User} $(DESC_App_User)
+	!insertmacro MUI_DESCRIPTION_TEXT ${App_Admin} $(DESC_App_Admin)
+	!insertmacro MUI_DESCRIPTION_TEXT ${OVpn} $(DESC_OVpn)
+	!insertmacro MUI_DESCRIPTION_TEXT ${App_Source} $(DESC_App_Source)
+	!insertmacro MUI_DESCRIPTION_TEXT ${Tiny_Source} $(DESC_Tiny_Source)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END

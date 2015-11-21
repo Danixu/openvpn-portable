@@ -1,0 +1,11 @@
+## 1.8.4
+* Changed the download site to mine
+* Added a page to allow the user to select if want to extract the source code or not
+* Updated the OpenVPN version to 2.3.8
+
+## 1.8.3_beta
+* I really don't know the changes. Was made by the orignal project maker.
+
+## 1.8.2
+* Command line option to overwrite default URL for downloading openvpn binaries
+* Fix driver install on 64-bit Systems

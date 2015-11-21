@@ -48,7 +48,7 @@
 
 ;Name and file
 ;OutFile "..\..\OpenVPNPortable\app\bin\TinyOpenVPNGui.exe"
-OutFile "TinyOpenVPNGui.exe"
+OutFile "..\..\OutFolder\TinyOpenVPNGui.exe"
 
 ;Default installation folder
 ;InstallDir "$EXEDIR\..\..\"

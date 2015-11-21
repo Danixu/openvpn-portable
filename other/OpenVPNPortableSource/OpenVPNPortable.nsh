@@ -4,7 +4,7 @@
        !define APP "OpenVPN"
        !define VER "1.7.7.0"	;Version of the Portable App, Version of OpenVPN is found on .\app\appinfo\appinfo.ini
        ;!define SUBVER "RC4"
-       !define WEBSITE "http://www.sourceforge.net/projects/ovpnp"
+       !define WEBSITE "https://bitbucket.org/Danixu86/openvpn-portable"
        !define DEFAULTAPPDIR "app\bin"
        !define DEFAULTDRVDIR "app\driver"
        !define DEFAULTCONFIGDIR "data\config"
@@ -23,7 +23,8 @@
 !macro PROGRAM_DETAILS
        ;=== Program Details
        Name "${NAME}"
-       OutFile "${OutputFolder}\${NAME}.exe"
+	   ;= Moved to variables.nsh
+       ;OutFile "${OutputFolder}\${NAME}.exe"
        Caption "${FRIENDLYNAME} - OpenVPN Made Portable"
        VIProductVersion "${VER}"
        VIAddVersionKey FileDescription "${FRIENDLYNAME}"
@@ -33,6 +34,16 @@
        VIAddVersionKey FileVersion "${VER}"
 !macroend
 
+!macro PROGRAM_VARIABLES
+	!ifdef Admin
+		RequestExecutionLevel admin
+		OutFile "${OutputFolder}\${NAME}_admin.exe"
+	!else
+		RequestExecutionLevel user
+		OutFile "${OutputFolder}\${NAME}.exe"
+	!endif
+!macroend
+
 !macro RUNTIME_SWITCHES
        ;=== Runtime Switches
        CRCCheck On
@@ -40,7 +51,8 @@
        ;SilentInstall Silent
        AutoCloseWindow True
        SetCompressor /SOLID LZMA
-       RequestExecutionLevel admin
+	   ;= Moved to variables.nsh
+       ;RequestExecutionLevel admin
 !macroend
 
 !macro PROGRAM_ICON ICONNAME

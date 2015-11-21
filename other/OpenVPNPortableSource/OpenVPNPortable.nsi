@@ -22,9 +22,7 @@
 !include "StrFunc.nsh"
 !include "OpenVPNPortable.nsh"
 !include "UAC.nsh"
-!include variables.nsh
-
-!system 'md "${OutputFolder}"'
+!include "CommonVariables.nsh"
 
 !insertmacro DEFINES "OpenVPNPortable"
 
@@ -35,6 +33,12 @@ WindowIcon Off
 SilentInstall Silent
 
 !insertmacro PROGRAM_ICON ${NAME}
+
+;!define Admin "true"
+
+!insertmacro PROGRAM_VARIABLES
+
+!system 'md "${OutputFolder}"'
 
 Var INIPATH
 Var PROGRAMDIRECTORY
