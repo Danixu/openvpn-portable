@@ -22,6 +22,9 @@
 !include "StrFunc.nsh"
 !include "OpenVPNPortable.nsh"
 !include "UAC.nsh"
+!include variables.nsh
+
+!system 'md "${OutputFolder}"'
 
 !insertmacro DEFINES "OpenVPNPortable"
 

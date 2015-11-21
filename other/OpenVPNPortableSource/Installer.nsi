@@ -21,6 +21,12 @@
 
 ;EXCEPTION: Can be used with non-GPLed open source apps distributed by PortableApps.com
 
+;=== Include
+!include MUI.nsh
+!include FileFunc.nsh
+!include variables.nsh
+
+
 !define NAME "OpenVPN Portable"
 !define SHORTNAME "OpenVPNPortable"
 !define VERSION "1.8.3.0"
@@ -30,7 +36,7 @@
 
 ;=== Program Details
 Name "${NAME}"
-OutFile "${FILENAME}.paf.exe"
+OutFile "${OutputFolder}\${FILENAME}.paf.exe"
 InstallDir "\${SHORTNAME}"
 Caption "${NAME} | PortableApps.com Installer"
 VIProductVersion "${VERSION}"
@@ -56,9 +62,10 @@ CRCCheck on
 RequestExecutionLevel user
 ShowInstDetails show
 
-;=== Include
-!include MUI.nsh
-!include FileFunc.nsh
+
+
+
+!system 'md "${OutputFolder}"'
 
 !insertmacro GetOptions
 !insertmacro GetDrives
@@ -76,6 +83,7 @@ Icon "${SHORTNAME}.ico"
 
 ;=== Pages and their order
 !insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !insertmacro MUI_PAGE_INSTFILES
@@ -87,6 +95,11 @@ Icon "${SHORTNAME}.ico"
 LangString welcome ${LANG_ENGLISH} "This wizard will guide you through the installation of ${NAME}.\r\n\r\nIf you are upgrading an existing installation of ${NAME}, please close it before proceeding.\r\n\r\nClick Next to continue."
 LangString finish ${LANG_ENGLISH} "${NAME} has been installed on your device.\r\n\r\nClick Finish to close this wizard."
 LangString runwarning ${LANG_ENGLISH} "Please close all instances of ${CLOSENAME} and then click OK.  The portable app can not be upgraded while it is running."
+
+!insertmacro MUI_LANGUAGE "Spanish"
+LangString welcome ${LANG_SPANISH} "Este asistente te guiará a lo largo de la instalación de ${NAME}.\r\n\r\nIf you are upgrading an existing installation of ${NAME}, please close it before proceeding.\r\n\r\nClick Next to continue."
+LangString finish ${LANG_SPANISH} "${NAME} has been installed on your device.\r\n\r\nClick Finish to close this wizard."
+LangString runwarning ${LANG_SPANISH} "Please close all instances of ${CLOSENAME} and then click OK.  The portable app can not be upgraded while it is running."
 
 ;=== Variables
 Var FOUNDPORTABLEAPPSPATH
@@ -135,7 +148,7 @@ Function .onInit
 		
 	DefaultUrl:
 		ClearErrors
-		StrCpy $BINPACKURL "http://iweb.dl.sourceforge.net/project/ovpnp/binpack"
+		StrCpy $BINPACKURL "https://bitbucket.org/Danixu86/openvpn-portable/downloads"
 	
 	InitDone:
 FunctionEnd
@@ -171,7 +184,12 @@ FunctionEnd
 
 Section "!App Portable (required)"
 	SetOutPath $INSTDIR
-	File /r "..\..\*.*"
+
+	File OpenVPNPortable.ini
+	File ${OutputFolder}\OpenVPNPortable.exe
+	
+	SetOutPath $INSTDIR\app
+	File /r "..\..\app\*.*"
 	
 	StrCmp "$BINPACKURL" "." CopyCurrent
 		StrCpy $2 "$BINPACKURL/current.txt"
@@ -206,6 +224,8 @@ Section "!App Portable (required)"
 	StrCmp "$BINPACKURL" "." CopyBinpack
 		StrCpy $2 "$BINPACKURL/$1.zip"
 		
+		;inetc::get /POPUP "" /CAPTION "Probando..." "https://bitbucket.org/Danixu86/openvpn-portable/downloads/current.txt" "$DESKTOP\temp.txt" /END
+		
 		;Download the package.
 		inetc::get /POPUP "" /CAPTION "Get latest openvpn binaries..." $2 "$TEMP\current.zip" /END
 		Pop $R0 ;Get the return value
@@ -234,4 +254,14 @@ Section "!App Portable (required)"
 		MessageBox MB_OK|MB_ICONSTOP "Unable to download file $2 ($R0)"
 	
 	End:
+SectionEnd
+
+Section "!OpenVPNPortable Source Code"
+	SetOutPath $INSTDIR\other\OpenVPNPortableSource
+	File /r "..\..\other\OpenVPNPortableSource\*.*"
+SectionEnd
+
+Section "!TinyOpenVPNGui NSIS Source Code"
+	SetOutPath $INSTDIR\other\TinyOpenVPNGuiNSIS
+	File /r "..\..\other\TinyOpenVPNGuiNSIS\*.*"
 SectionEnd

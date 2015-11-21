@@ -23,7 +23,7 @@
 !macro PROGRAM_DETAILS
        ;=== Program Details
        Name "${NAME}"
-       OutFile "${NAME}.exe"
+       OutFile "${OutputFolder}\${NAME}.exe"
        Caption "${FRIENDLYNAME} - OpenVPN Made Portable"
        VIProductVersion "${VER}"
        VIAddVersionKey FileDescription "${FRIENDLYNAME}"
