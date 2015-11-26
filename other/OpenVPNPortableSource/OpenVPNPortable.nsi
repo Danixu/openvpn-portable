@@ -18,6 +18,9 @@
 ;along with this program; if not, write to the Free Software
 ;Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+# Force Admin App
+;!define Admin "true"
+
 !include "LogicLib.nsh"
 !include "StrFunc.nsh"
 !include "OpenVPNPortable.nsh"
@@ -25,21 +28,20 @@
 !include "CommonVariables.nsh"
 
 !insertmacro DEFINES "OpenVPNPortable"
-
 !insertmacro PROGRAM_DETAILS
-
 !insertmacro RUNTIME_SWITCHES
+!insertmacro PROGRAM_VARIABLES
+!insertmacro PROGRAM_ICON ${NAME}
+
 WindowIcon Off
 SilentInstall Silent
 
-!insertmacro PROGRAM_ICON ${NAME}
-
-;!define Admin "true"
-
-!insertmacro PROGRAM_VARIABLES
-
 !system 'md "${OutputFolder}"'
 
+# Include language files
+!include "OpenVPNPortable_Lang_*.nsh"
+
+# Variables
 Var INIPATH
 Var PROGRAMDIRECTORY
 Var DRIVERDIRECTORY
@@ -53,20 +55,34 @@ Var SHOWSPLASH
 Var INSTBEHAVIOUR
 Var UNINSTBEHAVIOUR
 Var AUTOCONNECT
+Var WindowsVersion
+Var DefaultDRVDirectory
+Var DefaultAPPDirectory
 
 # Call to initialize
 ${StrLoc}
+${StrRep}
 
 Section "Main"
 	${If} ${UAC_IsInnerInstance}
 		# Don't test mutex in inner instance
 		Goto Begin
 	${EndIf}
+	
+	nsisos::osversion
+	${If} "$0" == "5"
+		StrCpy "$WindowsVersion" "XP"
+	${Else}
+		StrCpy "$WindowsVersion" "Vista"
+	${EndIf}
+	
+	${StrRep} "$DefaultAPPDirectory" "${DEFAULTAPPDIR}" "%WinVer%" "$WindowsVersion"
+	${StrRep} "$DefaultDRVDirectory" "${DEFAULTDRVDIR}" "%WinVer%" "$WindowsVersion"
 
     System::Call 'kernel32::CreateMutexA(i 0, i 0, t "${NAME}Mutex") i .r1 ?e'
     Pop $R5
     StrCmp $R5 0 +3
-    MessageBox MB_OK|MB_ICONQUESTION|MB_TOPMOST `It appears that ${NAME} is already running.`
+    MessageBox MB_OK|MB_ICONQUESTION|MB_TOPMOST `$(MAIN_App_Running)`
     Quit
 
 	Begin:
@@ -74,10 +90,10 @@ Section "Main"
 			StrCpy "$INIPATH" "$EXEDIR"
 
 		ReadINIStr $0 "$INIPATH\${NAME}.ini" "${NAME}" "${APP}Directory"
-		StrCpy $PROGRAMDIRECTORY "$EXEDIR\$0"
+		${StrRep} "$PROGRAMDIRECTORY" "$EXEDIR\$0" "%WinVer%" "$WindowsVersion"
 				
 		ReadINIStr $0 "$INIPATH\${NAME}.ini" "${NAME}" "DriverDirectory"
-		StrCpy $DRIVERDIRECTORY "$EXEDIR\$0"
+		${StrRep} "$DRIVERDIRECTORY" "$EXEDIR\$0" "%WinVer%" "$WindowsVersion"
 				
 		ReadINIStr $0 "$INIPATH\${NAME}.ini" "${NAME}" "ConfigDirectory"
 		StrCpy $CONFIGDIRECTORY "$EXEDIR\$0"
@@ -110,12 +126,12 @@ Section "Main"
 			Goto LogDirExists
 		
 	NoINI:	
-		IfFileExists "$EXEDIR\${DEFAULTAPPDIR}\${DEFAULTEXE}" "" NoProgramEXE
-			StrCpy $PROGRAMDIRECTORY "$EXEDIR\${DEFAULTAPPDIR}"
+		IfFileExists "$EXEDIR\$DefaultAPPDirectory\${DEFAULTEXE}" "" NoProgramEXE
+			StrCpy "$PROGRAMDIRECTORY" "$EXEDIR\$DefaultAPPDirectory"
 			StrCpy $EXECBINARY ${DEFAULTEXE}
 				
-		IfFileExists "$EXEDIR\${DEFAULTDRVDIR}\win32\${DRIVERFILE}" "" NoDriverFile
-			StrCpy $DRIVERDIRECTORY "$EXEDIR\${DEFAULTDRVDIR}"
+		IfFileExists "$EXEDIR\$DefaultDRVDirectory\win32\${DRIVERFILE}" "" NoDriverFile
+			StrCpy "$DRIVERDIRECTORY" "$EXEDIR\$DefaultDRVDirectory"
 				
 		IfFileExists "$EXEDIR\${DEFAULTCONFIGDIR}\${CONFIGFILE}" "" NoConfigFile
 			StrCpy $CONFIGDIRECTORY "$EXEDIR\${DEFAULTCONFIGDIR}"
@@ -194,7 +210,7 @@ Section "Main"
 		Goto RefreshConfigEnd
 	
 	DownloadFailed:
-		MessageBox MB_OK|MB_ICONSTOP "Unable to download file $2 ($R0)"
+		MessageBox MB_OK|MB_ICONSTOP "$(MAIN_Unable_Download) $2 ($R0)"
 	
 	RefreshConfigEnd:
 		Call GetParameters
@@ -203,15 +219,15 @@ Section "Main"
 		Goto FoundProgramEXE
 		
 	NoProgramEXE:
-		MessageBox MB_OK|MB_ICONEXCLAMATION `$EXEDIR\${DEFAULTAPPDIR}\${DEFAULTEXE} was not found.  Please check your configuration`
+		MessageBox MB_OK|MB_ICONEXCLAMATION `$EXEDIR\$DefaultAPPDirectory\${DEFAULTEXE} $(MAIN_Not_Found)`
 		Abort
 		
 	NoDriverFile:
-		MessageBox MB_OK|MB_ICONEXCLAMATION `$EXEDIR\${DEFAULTDRVDIR}\${DRIVERFILE} was not found.  Please check your configuration`
+		MessageBox MB_OK|MB_ICONEXCLAMATION `$EXEDIR\$DefaultDRVDirectory\${DRIVERFILE} $(MAIN_Not_Found)`
 		Abort
 		
 	NoConfigFile:
-		MessageBox MB_OK|MB_ICONEXCLAMATION `You need at least one ${CONFIGFILE} file on $EXEDIR\${DEFAULTCONFIGDIR}\ for a working VPN.  Please check your configuration`
+		MessageBox MB_OK|MB_ICONEXCLAMATION `$(MAIN_No_Config)`
 		Abort
 		
 	FoundProgramEXE:
@@ -273,7 +289,7 @@ Section "Main"
 	InstallTaps:
 		${If} $INSTBEHAVIOUR == "ask"
 		${AndIfNot} ${UAC_IsInnerInstance}
-			MessageBox MB_YESNO|MB_ICONQUESTION `Install required virtual network drivers for ${NAME}?` IDNO End
+			MessageBox MB_YESNO|MB_ICONQUESTION `$(MAIN_Install_Tap)` IDNO End
 		${EndIf}
 
 		ExecDos::exec `"$PROGRAMDIRECTORY\$TAPINSTALL" install "$DRIVERDIRECTORY\${DRIVERFILE}" ${DRIVERNAME}` ""
@@ -290,7 +306,7 @@ Section "Main"
 		
 		${If} ${UAC_IsInnerInstance}
 		${AndIfNot} ${UAC_IsAdmin}
-			MessageBox MB_OK|MB_ICONEXCLAMATION `Error by installing virtual network drivers. Please start this app as a user with admin rights.`
+			MessageBox MB_OK|MB_ICONEXCLAMATION `$(MAIN_Install_Tap_Error)`
 			Goto End
 		${EndIf}
 		
@@ -307,7 +323,7 @@ Section "Main"
 		;INSERT HERE new command
 		
 		${If} $UNINSTBEHAVIOUR == "ask"
-			MessageBox MB_YESNO|MB_ICONQUESTION `Uninstall ${NAME} virtual network drivers?` IDNO End
+			MessageBox MB_YESNO|MB_ICONQUESTION `$(MAIN_Uninstall_Tap)` IDNO End
 		${ElseIf} $UNINSTBEHAVIOUR == "false"
 			Goto End
 		${EndIf}
@@ -327,14 +343,14 @@ Section "Main"
 				Goto Loop
 			ExitLoop:
 			
-			MessageBox MB_OK `${NAME} virtual network drivers were successfully uninstalled`
+			MessageBox MB_OK `$(MAIN_Uninstall_Tap_Ok)`
 			Goto End
 		${EndIf}
 		
 	UninstallFailed:
 		${If} ${UAC_IsInnerInstance}
 		${AndIfNot} ${UAC_IsAdmin}
-			MessageBox MB_OK|MB_ICONEXCLAMATION `Error by uninstalling virtual network drivers. Please start this app as a user with admin rights.`
+			MessageBox MB_OK|MB_ICONEXCLAMATION `$(MAIN_Uninstall_Tap_Error)`
 			Goto End
 		${EndIf}
 	

@@ -54,7 +54,7 @@ Else
 	WScript.Quit
 End If
 
-'delFolderIfExists root & "\OutFolder"
+delFolderIfExists root & "\OutFolder"
 
 MsgBox "Script successful finished"
 

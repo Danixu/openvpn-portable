@@ -170,35 +170,9 @@ Function CheckForRunningApp
 FunctionEnd
 
 SubSection $(SECTION_App)
-	Section $(SECTION_App_User) App_User
-		SetOutPath $INSTDIR
-
-		File OpenVPNPortable.ini
-		File ${OutputFolder}\OpenVPNPortable.exe
-		
-		SetOutPath $INSTDIR\app
-		File /r "..\..\app\*.*"
-		
-		SetOutPath $INSTDIR\app\bin
-		File ${OutputFolder}\TinyOpenVPNGui.exe
-	SectionEnd
-
-	Section $(SECTION_App_Admin) App_Admin
-		SetOutPath $INSTDIR
-
-		File OpenVPNPortable.ini
-		File ${OutputFolder}\OpenVPNPortable_admin.exe
-		
-		SetOutPath $INSTDIR\app
-		File /r "..\..\app\*.*"
-		
-		SetOutPath $INSTDIR\app\bin
-		File ${OutputFolder}\TinyOpenVPNGui.exe
-	SectionEnd
-
-	Section $(SECTION_App_OVpn) OVpn
+	Section $(SECTION_App_OVpn_XP) OVpn_XP
 		StrCmp "$BINPACKURL" "." CopyCurrent
-			StrCpy $2 "$BINPACKURL/current.txt"
+			StrCpy $2 "$BINPACKURL/current_XP.txt"
 			
 			;get the latest version of the package.
 			inetc::get /SILENT "$2" "$TEMP\new.txt" /END
@@ -207,7 +181,7 @@ SubSection $(SECTION_App)
 				Goto ReadFile
 		
 		CopyCurrent:
-			StrCpy $2 "$EXEDIR/current.txt"
+			StrCpy $2 "$EXEDIR/current_XP.txt"
 			CopyFiles "$2" "$TEMP/new.txt"
 			IfErrors DownloadFailed
 				
@@ -219,8 +193,8 @@ SubSection $(SECTION_App)
 		
 		StrCpy $2 "0.0.0"
 		
-		IfFileExists "$INSTDIR\current.txt" 0 Compare
-			FileOpen $0 "$INSTDIR\current.txt" r
+		IfFileExists "$INSTDIR\current_XP.txt" 0 Compare
+			FileOpen $0 "$INSTDIR\current_XP.txt" r
 			FileRead $0 $2
 			FileClose $0
 		
@@ -228,7 +202,7 @@ SubSection $(SECTION_App)
 			StrCmp "$1" "$2" End 0
 		
 		StrCmp "$BINPACKURL" "." CopyBinpack
-			StrCpy $2 "$BINPACKURL/$1.zip"
+			StrCpy $2 "$BINPACKURL/$1_XP.zip"
 			
 			;Download the package.
 			inetc::get /POPUP "" /CAPTION "Get latest openvpn binaries..." $2 "$TEMP\current.zip" /END
@@ -248,7 +222,7 @@ SubSection $(SECTION_App)
 
 			Delete /REBOOTOK "$TEMP\current.zip"
 			
-			FileOpen $0 $INSTDIR\current.txt w
+			FileOpen $0 $INSTDIR\current_XP.txt w
 			FileWrite $0 $1
 			FileClose $0
 			
@@ -263,6 +237,146 @@ SubSection $(SECTION_App)
 			MessageBox MB_OK|MB_ICONSTOP "Unable to download file $2 ($R0)"
 		
 		End:
+	SectionEnd
+	
+	Section $(SECTION_App_OVpn_Vista) OVpn_Vista
+		StrCmp "$BINPACKURL" "." CopyCurrent
+			StrCpy $2 "$BINPACKURL/current_Vista.txt"
+			
+			;get the latest version of the package.
+			inetc::get /SILENT "$2" "$TEMP\new.txt" /END
+			Pop $R0 ;Get the return value
+				StrCmp $R0 "OK" 0 DownloadFailed
+				Goto ReadFile
+		
+		CopyCurrent:
+			StrCpy $2 "$EXEDIR/current_Vista.txt"
+			CopyFiles "$2" "$TEMP/new.txt"
+			IfErrors DownloadFailed
+				
+		ReadFile:
+			FileOpen $0 "$TEMP\new.txt" r
+			FileRead $0 $1
+			FileClose $0
+			Delete /REBOOTOK "$TEMP\new.txt"
+		
+		StrCpy $2 "0.0.0"
+		
+		IfFileExists "$INSTDIR\current_Vista.txt" 0 Compare
+			FileOpen $0 "$INSTDIR\current_Vista.txt" r
+			FileRead $0 $2
+			FileClose $0
+		
+		Compare:
+			StrCmp "$1" "$2" End 0
+		
+		StrCmp "$BINPACKURL" "." CopyBinpack
+			StrCpy $2 "$BINPACKURL/$1_Vista.zip"
+			
+			;Download the package.
+			inetc::get /POPUP "" /CAPTION "Get latest openvpn binaries..." $2 "$TEMP\current.zip" /END
+			Pop $R0 ;Get the return value
+				StrCmp $R0 "OK" Extract DownloadFailed
+					
+		CopyBinpack:
+			StrCpy $2 "$EXEDIR/$1.zip"
+			CopyFiles "$2" "$TEMP\current.zip"
+			IfErrors DownloadFailed
+			
+		Extract:
+			nsisunz::UnzipToLog "$TEMP\current.zip" "$INSTDIR"
+			Pop $R0
+			StrCmp $R0 "success" +2
+				DetailPrint "$R0" ;print error message to log
+
+			Delete /REBOOTOK "$TEMP\current.zip"
+			
+			FileOpen $0 $INSTDIR\current_Vista.txt w
+			FileWrite $0 $1
+			FileClose $0
+			
+		CreateFolders:
+			CreateDirectory "$INSTDIR\data"
+			CreateDirectory "$INSTDIR\data\config"
+			CreateDirectory "$INSTDIR\data\log"
+			
+			Goto End
+		
+		DownloadFailed:
+			MessageBox MB_OK|MB_ICONSTOP "Unable to download file $2 ($R0)"
+		
+		End:
+	SectionEnd
+	
+	Section $(SECTION_App_User) App_User
+		SetOutPath $INSTDIR
+
+		File OpenVPNPortable.ini
+		File ${OutputFolder}\OpenVPNPortable.exe
+		
+		SetOutPath $INSTDIR\app\AppInfo
+		File /r "..\..\app\AppInfo\*.*"
+		
+		SectionGetFlags ${OVpn_XP} $R0
+		${If} "$R0" == "0"
+			SetOutPath $INSTDIR\app\XP\bin
+			File ${OutputFolder}\TinyOpenVPNGui.exe
+			
+			SetOutPath $INSTDIR\app\XP\bin
+			File ${OutputFolder}\TinyOpenVPNGui.exe			
+		${EndIf}
+		
+		SectionGetFlags ${OVpn_XP} $R0
+		${If} "$R0" == "1"
+			SetOutPath $INSTDIR\app\XP\bin
+			File ${OutputFolder}\TinyOpenVPNGui.exe
+			
+			SetOutPath $INSTDIR\app\XP\bin
+			File /r "..\..\app\bin\*.*"			
+		${EndIf}
+		
+		SectionGetFlags ${OVpn_Vista} $R0
+		${If} "$R0" == "1"
+			SetOutPath $INSTDIR\app\Vista\bin
+			File ${OutputFolder}\TinyOpenVPNGui.exe
+			
+			SetOutPath $INSTDIR\app\Vista\bin
+			File /r "..\..\app\bin\*.*"			
+		${EndIf}
+	SectionEnd
+
+	Section $(SECTION_App_Admin) App_Admin
+		SetOutPath $INSTDIR
+
+		File OpenVPNPortable.ini
+		SectionGetFlags ${App_User} $R0
+		${If} "$R0" == "0"
+			File "/oname=OpenVPNPortable.exe" ${OutputFolder}\OpenVPNPortable_admin.exe
+		${Else}
+			File ${OutputFolder}\OpenVPNPortable_admin.exe
+		${EndIf}
+		
+		
+		SetOutPath $INSTDIR\app\AppInfo
+		File /r "..\..\app\AppInfo\*.*"
+		
+		SectionGetFlags ${OVpn_XP} $R0
+		${If} "$R0" == "1"
+			SetOutPath $INSTDIR\app\XP\bin
+			File ${OutputFolder}\TinyOpenVPNGui.exe
+			
+			SetOutPath $INSTDIR\app\XP\bin
+			File /r "..\..\app\bin\*.*"			
+		${EndIf}
+		
+		SectionGetFlags ${OVpn_Vista} $R0
+		${If} "$R0" == "1"
+			SetOutPath $INSTDIR\app\Vista\bin
+			File ${OutputFolder}\TinyOpenVPNGui.exe
+			
+			SetOutPath $INSTDIR\app\Vista\bin
+			File /r "..\..\app\bin\*.*"			
+		${EndIf}
 	SectionEnd
 SubSectionEnd
 
@@ -286,7 +400,8 @@ SubSectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 	!insertmacro MUI_DESCRIPTION_TEXT ${App_User} $(DESC_App_User)
 	!insertmacro MUI_DESCRIPTION_TEXT ${App_Admin} $(DESC_App_Admin)
-	!insertmacro MUI_DESCRIPTION_TEXT ${OVpn} $(DESC_OVpn)
+	!insertmacro MUI_DESCRIPTION_TEXT ${OVpn_XP} $(DESC_OVpn_XP)
+	!insertmacro MUI_DESCRIPTION_TEXT ${OVpn_Vista} $(DESC_OVpn_Vista)
 	!insertmacro MUI_DESCRIPTION_TEXT ${App_Source} $(DESC_App_Source)
 	!insertmacro MUI_DESCRIPTION_TEXT ${Tiny_Source} $(DESC_Tiny_Source)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END

@@ -1,12 +1,12 @@
-!macro DEFINES PNAME
+﻿!macro DEFINES PNAME
        !define NAME "${PNAME}"
        !define FRIENDLYNAME "OpenVPN Portable"
        !define APP "OpenVPN"
        !define VER "1.7.7.0"	;Version of the Portable App, Version of OpenVPN is found on .\app\appinfo\appinfo.ini
        ;!define SUBVER "RC4"
        !define WEBSITE "https://bitbucket.org/Danixu86/openvpn-portable"
-       !define DEFAULTAPPDIR "app\bin"
-       !define DEFAULTDRVDIR "app\driver"
+       !define DEFAULTAPPDIR "app\%WinVer%\bin"
+       !define DEFAULTDRVDIR "app\%WinVer%\driver"
        !define DEFAULTCONFIGDIR "data\config"
        !define DEFAULTCONFIGURL "."
        !define DEFAULTLOGDIR "data\log"
