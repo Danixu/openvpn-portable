@@ -97,6 +97,7 @@ Section "Main"
 				
 		ReadINIStr $0 "$INIPATH\${NAME}.ini" "${NAME}" "ConfigDirectory"
 		StrCpy $CONFIGDIRECTORY "$EXEDIR\$0"
+		IfFileExists "$CONFIGDIRECTORY\${CONFIGFILE}" "" NoConfigFile
 
 		ReadINIStr $0 "$INIPATH\${NAME}.ini" "${NAME}" "ConfigRefreshUrl"
 		StrCpy $CONFIGURL "$0"
@@ -314,6 +315,14 @@ Section "Main"
 		Goto End
 		
 	Launch:
+		InstDrv::InitDriverSetup /NOUNLOAD "${DRIVERID}" "${DRIVERNAME}"
+		InstDrv::CountDevices
+            Pop $0
+            ${If} "$0" == "0"
+				MessageBox MB_OK|MB_ICONEXCLAMATION `$(MAIN_Install_Tap_Error)`
+				Abort
+			${EndIf}
+	
 		${If} $SHOWSPLASH == "true"
 			File /oname=$PLUGINSDIR\splash.jpg "${NAME}.jpg"
 			newadvsplash::show /NOUNLOAD 2000 400 400 -1 /NOCANCEL $PLUGINSDIR\splash.jpg

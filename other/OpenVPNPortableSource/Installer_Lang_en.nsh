@@ -8,8 +8,8 @@ LangString runwarning ${LANG_ENGLISH} "Please close all instances of ${CLOSENAME
 LangString SECTION_App ${LANG_ENGLISH} "OpenVPN Portable"
 LangString SECTION_App_User ${LANG_ENGLISH} "OpenVPN Portable (User)"
 LangString SECTION_App_Admin ${LANG_ENGLISH} "OpenVPN Portable (Admin)"
-LangString SECTION_App_OVpn_XP ${LANG_ENGLISH} "Necessary files from OpenVPN"
-LangString SECTION_App_OVpn_Vista ${LANG_SPANISH} "Necessary files from OpenVPN (Vista and above)"
+LangString SECTION_App_OVpn_XP ${LANG_ENGLISH} "Necessary files from OpenVPN (XP)"
+LangString SECTION_App_OVpn_Vista ${LANG_ENGLISH} "Necessary files from OpenVPN (Vista and above)"
 
 LangString SECTION_Source ${LANG_ENGLISH} "Source Code"
 LangString SECTION_Source_OpenVPN ${LANG_ENGLISH} "OpenVPN Portable"
