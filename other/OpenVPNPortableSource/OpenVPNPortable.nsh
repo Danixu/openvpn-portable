@@ -2,13 +2,12 @@
        !define NAME "${PNAME}"
        !define FRIENDLYNAME "OpenVPN Portable"
        !define APP "OpenVPN"
-       !define VER "1.7.7.0"	;Version of the Portable App, Version of OpenVPN is found on .\app\appinfo\appinfo.ini
+       !define VER "1.9.0.0"	;Version of the Portable App, Version of OpenVPN is found on .\app\appinfo\appinfo.ini
        ;!define SUBVER "RC4"
        !define WEBSITE "https://bitbucket.org/Danixu86/openvpn-portable"
        !define DEFAULTAPPDIR "app\%WinVer%\bin"
-       !define DEFAULTDRVDIR "app\%WinVer%\driver"
+       !define DEFAULTDRVDIR "app\%WinVer%\driver\$CPU"
        !define DEFAULTCONFIGDIR "data\config"
-       !define DEFAULTCONFIGURL "."
        !define DEFAULTLOGDIR "data\log"
        !define DEFAULTEXE "openvpn-gui.exe"
        !define TINYEXE "TinyOpenVPNGui.exe"

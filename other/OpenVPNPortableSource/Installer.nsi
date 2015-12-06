@@ -28,8 +28,8 @@
 
 !define NAME "OpenVPN Portable"
 !define SHORTNAME "OpenVPNPortable"
-!define VERSION "1.8.4.0"
-!define FILENAME "OpenVPNPortable_1.8.4"
+!define VERSION "1.9.0.0"
+!define FILENAME "OpenVPNPortable_1.9.0"
 !define CHECKRUNNING "openvpn-gui.exe"
 !define CLOSENAME "OpenVPN"
 
@@ -84,7 +84,7 @@ Icon "${SHORTNAME}.ico"
 !insertmacro MUI_PAGE_FINISH
 
 ; Languages
-!include "Installer_Lang_*.nsh"
+!include "Lang\Installer\*.nsh"
 
 ;=== Variables
 Var FOUNDPORTABLEAPPSPATH
@@ -309,7 +309,7 @@ SubSection $(SECTION_App)
 	SectionEnd
 	
 	Section $(SECTION_App_User) App_User
-		SetOutPath $INSTDIR
+		SetOutPath $INSTDIR\data
 
 		File OpenVPNPortable.ini
 		File ${OutputFolder}\OpenVPNPortable.exe
@@ -346,7 +346,7 @@ SubSection $(SECTION_App)
 	SectionEnd
 
 	Section $(SECTION_App_Admin) App_Admin
-		SetOutPath $INSTDIR
+		SetOutPath $INSTDIR\data
 
 		File OpenVPNPortable.ini
 		SectionGetFlags ${App_User} $R0

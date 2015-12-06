@@ -20,9 +20,13 @@ All you need to do is double click OpenVPNPortable.exe to start.
 
 If you want to connect on program startup, disable the splash or some settings else, edit OpenVPNPortable.ini to change the behaviour of OpenVPN Portable.
 
-## Last changes (1.8.2)
-* Command line option to overwrite default URL for downloading openvpn binaries
-* Fix driver install on 64-bit Systems
+## Last changes (1.9.0)
+* Now the driver install/uninstall is on external exe to avoid problems
+* Optimized and cleanup of source code
+* Now the program only uninstall the TAP driver if was instaled before. Usefull if you already have installed the OpenVPN.
+* The configuration file was moved to data folder.
+* I'm starting to implement log files inside the programs to allow to detect and report problems (For now only the driver installer).
+* The App is prepared to fit the portableapps.com standard.
  
  
 # How to build
@@ -37,7 +41,9 @@ OpenVPNPortable:
 * [ExecDos](http://nsis.sourceforge.net/ExecDos_plug-in)
 * [Inetc](http://nsis.sourceforge.net/Inetc_plug-in)
 * [InstDrv](http://nsis.sourceforge.net/InstDrv_plug-in)
+* [LogEx](http://nsis.sourceforge.net/LogEx_plug-in)
 * [NewAdvSplash](http://nsis.sourceforge.net/NewAdvSplash_plug-in)
+* [Nsisos](http://nsis.sourceforge.net/NSIS-OS_plug-in)
 * [nsUnzip](http://nsis.sourceforge.net/NsUnzip_plugin)
 * [UAC](http://nsis.sourceforge.net/UAC_plug-in)
 

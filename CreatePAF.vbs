@@ -43,6 +43,9 @@ Set FileOut = nothing
 delFolderIfExists root & "\OutFolder"
 
 If fso.FileExists(nsis) then
+	WSHShellRun """" & nsis & """", """" & root & "\other\OpenVPNPortableSource\DriverInstaller.nsi"""
+	WSHShellRun """" & nsis & """", """" & root & "\other\OpenVPNPortableSource\DriverUninstaller.nsi"""
+	
 	WSHShellRun """" & nsis & """", """" & root & "\other\OpenVPNPortableSource\OpenVPNPortable.nsi"""
 	WSHShellRun """" & nsis & """", "/DAdmin=true """ & root & "\other\OpenVPNPortableSource\OpenVPNPortable.nsi"""
 	    
