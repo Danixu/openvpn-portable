@@ -312,6 +312,8 @@ SubSection $(SECTION_App)
 		SetOutPath $INSTDIR\data
 
 		File OpenVPNPortable.ini
+		
+		SetOutPath $INSTDIR
 		File ${OutputFolder}\OpenVPNPortable.exe
 		
 		SetOutPath $INSTDIR\app\AppInfo
@@ -349,6 +351,8 @@ SubSection $(SECTION_App)
 		SetOutPath $INSTDIR\data
 
 		File OpenVPNPortable.ini
+		
+		SetOutPath $INSTDIR
 		SectionGetFlags ${App_User} $R0
 		${If} "$R0" == "0"
 			File "/oname=OpenVPNPortable.exe" ${OutputFolder}\OpenVPNPortable_admin.exe
