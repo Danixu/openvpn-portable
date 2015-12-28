@@ -94,7 +94,7 @@ Section "Main"
 	
 	# Check if ini file exists and read the options
 	IfFileExists "$EXEDIR\Data\OpenVPNPortable.ini" "" NoINI
-		StrCpy "$INIPATH" "$EXEDIR"
+		StrCpy "$INIPATH" "$EXEDIR\Data"
 
 	ReadINIStr $0 "$INIPATH\OpenVPNPortable.ini" "OpenVPNPortable" "OpenVPNDirectory"
 	${StrRep} "$PROGRAMDIRECTORY" "$EXEDIR\$0" "%WinVer%" "$WindowsVersion"
